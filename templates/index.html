@@ -1,1 +1,121 @@
-<INSERT FRONTEND HTML HERE>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Enginuity AI - DevOps Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal p-6">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-8 space-y-6">
+    <h1 class="text-3xl font-bold text-center text-indigo-600">Enginuity AI</h1>
+    <p class="text-center text-gray-500">Smart DevOps ChatOps + Automation Assistant</p>
+
+    <!-- Chat UI -->
+    <div>
+      <label class="block text-gray-700 mb-2">💬 Chat with Enginuity</label>
+      <div class="flex">
+        <input id="chatInput" type="text" placeholder="e.g., Deploy the latest version of payment-service" 
+               class="flex-grow p-2 border rounded-l-xl" />
+        <button onclick="sendChat()" class="bg-indigo-600 text-white px-4 rounded-r-xl">Send</button>
+      </div>
+      <div id="chatResponse" class="mt-3 p-3 bg-gray-50 rounded text-gray-800"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+      <div>
+        <label class="block text-gray-700 mb-2">📜 Get Logs</label>
+        <div class="flex">
+          <input id="logService" type="text" placeholder="e.g., payment-service" class="flex-grow p-2 border rounded-l-xl" />
+          <button onclick="getLogs()" class="bg-blue-500 text-white px-4 rounded-r-xl">Fetch</button>
+        </div>
+        <pre id="logOutput" class="bg-gray-100 p-3 mt-2 rounded overflow-auto text-sm h-32"></pre>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-2">🔮 Predict Incident</label>
+        <div class="flex">
+          <input id="predictService" type="text" placeholder="e.g., payment-service" class="flex-grow p-2 border rounded-l-xl" />
+          <button onclick="predictIncident()" class="bg-purple-500 text-white px-4 rounded-r-xl">Predict</button>
+        </div>
+        <div id="predictOutput" class="bg-gray-50 p-3 mt-2 rounded text-sm"></div>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-2">🛠️ SmartFix Suggestion</label>
+        <div class="flex">
+          <input id="fixService" type="text" placeholder="e.g., payment-service" class="flex-grow p-2 border rounded-l-xl" />
+          <button onclick="smartFix()" class="bg-green-600 text-white px-4 rounded-r-xl">Suggest</button>
+        </div>
+        <div id="fixOutput" class="bg-gray-50 p-3 mt-2 rounded text-sm"></div>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-2">😓 Check Burnout</label>
+        <div class="flex">
+          <input id="burnoutEngineer" type="text" placeholder="e.g., ravi" class="flex-grow p-2 border rounded-l-xl" />
+          <button onclick="checkBurnout()" class="bg-red-500 text-white px-4 rounded-r-xl">Check</button>
+        </div>
+        <div id="burnoutOutput" class="bg-gray-50 p-3 mt-2 rounded text-sm"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function sendChat() {
+      const msg = document.getElementById('chatInput').value;
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      document.getElementById('chatResponse').textContent = data.response;
+    }
+
+    async function getLogs() {
+      const service = document.getElementById('logService').value;
+      const res = await fetch(`/logs/${service}`);
+      const data = await res.json();
+      document.getElementById('logOutput').textContent = data.logs;
+    }
+
+    async function predictIncident() {
+      const service = document.getElementById('predictService').value;
+      const res = await fetch('/incident_predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service })
+      });
+      const data = await res.json();
+      document.getElementById('predictOutput').innerHTML =
+        `<strong>Prediction:</strong> ${data.prediction}<br><strong>Confidence:</strong> ${data.confidence}`;
+    }
+
+    async function smartFix() {
+      const service = document.getElementById('fixService').value;
+      const res = await fetch('/smartfix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service })
+      });
+      const data = await res.json();
+      if (data.match) {
+        document.getElementById('fixOutput').textContent = `Suggested fix: ${data.suggested_fix}`;
+      } else {
+        document.getElementById('fixOutput').textContent = 'No previous fixes found.';
+      }
+    }
+
+    async function checkBurnout() {
+      const engineer = document.getElementById('burnoutEngineer').value;
+      const res = await fetch(`/burnout_status/${engineer}`);
+      const data = await res.json();
+      document.getElementById('burnoutOutput').textContent =
+        `Status: ${data.status}. ${data.suggestion || ''}`;
+    }
+  </script>
+</body>
+</html>
